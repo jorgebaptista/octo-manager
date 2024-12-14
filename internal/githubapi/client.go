@@ -2,6 +2,7 @@ package githubapi
 
 import (
 	"context"
+	"log"
 	"os"
 
 	"github.com/google/go-github/v67/github"
@@ -18,9 +19,11 @@ func NewClient() (*Client, error) {
 	owner := os.Getenv("GITHUB_OWNER")
 
 	if token == "" {
+		log.Println("GITHUB_TOKEN is not set")
 		return nil, ErrMissingToken
 	}
 	if owner == "" {
+		log.Println("GITHUB_OWNER is not set")
 		return nil, ErrMissingOwner
 	}
 

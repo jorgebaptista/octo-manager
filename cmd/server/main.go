@@ -28,6 +28,10 @@ func main() {
 	// todo 2. Delete repo (placeholder)
 	router.DELETE("/repos/:name", func(c *gin.Context) {
 		name := c.Param("name")
+		if name == "" {
+			c.JSON(400, gin.H{"error": "repository name is required"})
+			return
+		}
 		c.JSON(200, gin.H{"message": "repo deleted (placeholder)", "repo": name})
 	})
 
@@ -54,7 +58,15 @@ func main() {
 	// todo 4. List N open pull requests for a repo (placeholder)
 	router.GET("/repos/:name/pulls", func(c *gin.Context) {
 		name := c.Param("name")
+		if name == "" {
+			c.JSON(400, gin.H{"error": "repository name is required"})
+			return
+		}
+
 		n := c.Query("n")
+		if n == "" {
+			n = "3" // default to 3
+		}
 		placeholderPRs := []string{"pr1", "pr2", "pr3"}
 		c.JSON(200, gin.H{"repo": name, "pull_requests": placeholderPRs, "count_requested": n})
 	})
