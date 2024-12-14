@@ -1,12 +1,21 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jorgebaptista/octo-manager/internal/githubapi"
 )
 
 func main() {
+	// Initialize GitHub client
+	ghClient, err := githubapi.NewClient()
+	if err != nil {
+		log.Fatalf("Failed to create GitHub client: %v", err)
+	}
+
 	router := gin.Default()
 
 	// Define routes (endpoints)
@@ -22,10 +31,24 @@ func main() {
 		c.JSON(200, gin.H{"message": "repo deleted (placeholder)", "repo": name})
 	})
 
-	// todo 3. List all repos (placeholder)
+	// List all repos (placeholder)
 	router.GET("/repos", func(c *gin.Context) {
-		sampleRepos := []string{"repo1", "repo2", "repo3"}
-		c.JSON(200, gin.H{"repositories": sampleRepos})
+		ctx := context.Background()
+		repos, err := ghClient.ListRepos(ctx)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+
+		// todo extract only the names for now
+		var repoNames []string
+		for _, repo := range repos {
+			if repo.Name != nil {
+				repoNames = append(repoNames, *repo.Name)
+			}
+		}
+
+		c.JSON(200, gin.H{"repositories": repoNames})
 	})
 
 	// todo 4. List N open pull requests for a repo (placeholder)
