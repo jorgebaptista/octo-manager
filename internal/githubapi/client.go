@@ -1,6 +1,7 @@
 package githubapi
 
 import (
+	"context"
 	"os"
 
 	"github.com/google/go-github/v67/github"
@@ -26,7 +27,7 @@ func NewClient() (*Client, error) {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
-	tc := oauth2.NewClient(oauth2.NoContext, ts)
+	tc := oauth2.NewClient(context.Background(), ts)
 
 	ghClient := github.NewClient(tc)
 
@@ -35,6 +36,14 @@ func NewClient() (*Client, error) {
 		owner: owner,
 	}, nil
 
+}
+
+func (c *Client) ListRepos(ctx context.Context) ([]*github.Repository, error) {
+	repos, _, err := c.gh.Repositories.ListByAuthenticatedUser(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	return repos, nil
 }
 
 // Define custom error types
