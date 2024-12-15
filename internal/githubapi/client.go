@@ -9,8 +9,25 @@ import (
 	"golang.org/x/oauth2"
 )
 
+type GitHubClient interface {
+	ListReposForOwner(ctx context.Context, owner string) ([]*github.Repository, error)
+}
+
+// Real implementation of the GitHubClient interface
+type RealGitHubClient struct {
+	gh *github.Client
+}
+
+func (r *RealGitHubClient) ListReposForOwner(ctx context.Context, owner string) ([]*github.Repository, error) {
+	repos, _, err := r.gh.Repositories.ListByAuthenticatedUser(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	return repos, nil
+}
+
 type Client struct {
-	gh    *github.Client
+	gh    GitHubClient
 	owner string
 }
 
@@ -33,20 +50,13 @@ func NewClient() (*Client, error) {
 	tc := oauth2.NewClient(context.Background(), ts)
 
 	ghClient := github.NewClient(tc)
+	real := &RealGitHubClient{gh: ghClient}
 
 	return &Client{
-		gh:    ghClient,
+		gh:    real,
 		owner: owner,
 	}, nil
 
-}
-
-func (c *Client) ListRepos(ctx context.Context) ([]*github.Repository, error) {
-	repos, _, err := c.gh.Repositories.ListByAuthenticatedUser(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-	return repos, nil
 }
 
 // Define custom error types
@@ -59,3 +69,14 @@ var (
 type Error string
 
 func (e Error) Error() string { return string(e) }
+
+func (c *Client) ListRepos(ctx context.Context) ([]*github.Repository, error) {
+	return c.gh.ListReposForOwner(ctx, c.owner)
+}
+
+func NewTestClient(mockClient GitHubClient, owner string) *Client {
+	return &Client{
+		gh:    mockClient,
+		owner: owner,
+	}
+}
