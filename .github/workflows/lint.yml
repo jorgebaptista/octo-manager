@@ -24,10 +24,10 @@ jobs:
       - name: Install golangci-lint
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s latest
-          golangci-lint --version
+          echo "PATH=$(pwd)/bin:\$PATH" >> $GITHUB_ENV
 
-      - name: Run golangci-lint with autofix
-        run: golangci-lint run ./... --fix
+      - name: Verify golangci-lint installation
+        run: golangci-lint --version
 
-      - name: Autofix formatting issues
-        run: gofmt -w .
+      - name: Run golangci-lint
+        run: golangci-lint run ./...
