@@ -94,6 +94,9 @@ func main() {
 	})
 
 	// Start server
-	fmt.Println("Server running on port http://localhost:8080")
-	router.Run(":8080")
+	port := ":8080"
+	fmt.Printf("Server running on port http://localhost%s\n", port)
+	if err := router.Run(port); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
