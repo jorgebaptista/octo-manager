@@ -22,14 +22,6 @@ type RealGitHubClient struct {
 }
 
 // todo log errors?
-func (r *RealGitHubClient) ListReposForOwner(ctx context.Context, owner string) ([]*github.Repository, error) {
-	repos, _, err := r.gh.Repositories.ListByAuthenticatedUser(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-	return repos, nil
-}
-
 func (r *RealGitHubClient) CreateRepoForOwner(ctx context.Context, owner, repoName string) (*github.Repository, error) {
 	newRepo := &github.Repository{Name: github.String(repoName)}
 	repo, _, err := r.gh.Repositories.Create(ctx, owner, newRepo)
@@ -43,6 +35,14 @@ func (r *RealGitHubClient) DeleteRepoForOwner(ctx context.Context, owner, repoNa
 	_, err := r.gh.Repositories.Delete(ctx, owner, repoName)
 	// todo why return err?
 	return err
+}
+
+func (r *RealGitHubClient) ListReposForOwner(ctx context.Context, owner string) ([]*github.Repository, error) {
+	repos, _, err := r.gh.Repositories.ListByAuthenticatedUser(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	return repos, nil
 }
 
 func (r *RealGitHubClient) ListPullRequestsForOwner(ctx context.Context, owner, repoName string) ([]*github.PullRequest, error) {
@@ -97,16 +97,16 @@ type Error string
 
 func (e Error) Error() string { return string(e) }
 
-func (c *Client) ListRepos(ctx context.Context) ([]*github.Repository, error) {
-	return c.gh.ListReposForOwner(ctx, c.owner)
-}
-
 func (c *Client) CreateRepo(ctx context.Context, repoName string) (*github.Repository, error) {
 	return c.gh.CreateRepoForOwner(ctx, c.owner, repoName)
 }
 
 func (c *Client) DeleteRepo(ctx context.Context, repoName string) error {
 	return c.gh.DeleteRepoForOwner(ctx, c.owner, repoName)
+}
+
+func (c *Client) ListRepos(ctx context.Context) ([]*github.Repository, error) {
+	return c.gh.ListReposForOwner(ctx, c.owner)
 }
 
 func (c *Client) ListPullRequests(ctx context.Context, repoName string) ([]*github.PullRequest, error) {

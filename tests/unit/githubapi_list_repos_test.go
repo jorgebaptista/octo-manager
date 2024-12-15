@@ -33,7 +33,7 @@ func TestClient_ListRepos_Success(t *testing.T) {
 
 func TestClient_ListRepos_Error(t *testing.T) {
 	mockClient := &mocks.MockGitHubClient{
-		Err: githubapi.Error("test error"),
+		Err: githubapi.Error("mock error"),
 	}
 	c := githubapi.NewTestClient(mockClient, "test_owner")
 
