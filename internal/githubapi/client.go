@@ -11,6 +11,7 @@ import (
 
 type GitHubClient interface {
 	ListReposForOwner(ctx context.Context, owner string) ([]*github.Repository, error)
+	CreateRepoForOwner(ctx context.Context, owner, repoName string) (*github.Repository, error)
 }
 
 // Real implementation of the GitHubClient interface
@@ -18,12 +19,22 @@ type RealGitHubClient struct {
 	gh *github.Client
 }
 
+// todo log errors?
 func (r *RealGitHubClient) ListReposForOwner(ctx context.Context, owner string) ([]*github.Repository, error) {
 	repos, _, err := r.gh.Repositories.ListByAuthenticatedUser(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 	return repos, nil
+}
+
+func (r *RealGitHubClient) CreateRepoForOwner(ctx context.Context, owner, repoName string) (*github.Repository, error) {
+	newRepo := &github.Repository{Name: github.String(repoName)}
+	repo, _, err := r.gh.Repositories.Create(ctx, owner, newRepo)
+	if err != nil {
+		return nil, err
+	}
+	return repo, nil
 }
 
 type Client struct {
@@ -36,11 +47,11 @@ func NewClient() (*Client, error) {
 	owner := os.Getenv("GITHUB_OWNER")
 
 	if token == "" {
-		log.Println("GITHUB_TOKEN is not set")
+		log.Println(ErrMissingToken)
 		return nil, ErrMissingToken
 	}
 	if owner == "" {
-		log.Println("GITHUB_OWNER is not set")
+		log.Println(ErrMissingOwner)
 		return nil, ErrMissingOwner
 	}
 
@@ -72,6 +83,10 @@ func (e Error) Error() string { return string(e) }
 
 func (c *Client) ListRepos(ctx context.Context) ([]*github.Repository, error) {
 	return c.gh.ListReposForOwner(ctx, c.owner)
+}
+
+func (c *Client) CreateRepo(ctx context.Context, repoName string) (*github.Repository, error) {
+	return c.gh.CreateRepoForOwner(ctx, c.owner, repoName)
 }
 
 func NewTestClient(mockClient GitHubClient, owner string) *Client {
