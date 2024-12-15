@@ -1,0 +1,35 @@
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  govet:
+    check-shadowing: true
+  staticcheck:
+    checks: ["all"]
+
+linters:
+  enable:
+    - govet
+    - errcheck # Unhandled errors
+    - staticcheck
+    - gofmt # Properly formatted
+    - unused # Unused variables
+    - deadcode # Unreachable or unused code
+    - ineffassign # Assignments that are never used
+    - gocyclo # Overly complex functions
+  disable:
+    - funlen
+
+run:
+  timeout: 5m
+  skip-dirs:
+    - vendor # Ignore vendor directory
+  skip-files:
+    - .*_test.go$ # Skip test files
+
+issues:
+  exclude-rules:
+    # Ignore warnings for generated files
+    - path: ".*generated.*"
+      linters:
+        - errcheck
