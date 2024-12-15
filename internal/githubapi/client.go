@@ -13,6 +13,7 @@ type GitHubClient interface {
 	ListReposForOwner(ctx context.Context, owner string) ([]*github.Repository, error)
 	CreateRepoForOwner(ctx context.Context, owner, repoName string) (*github.Repository, error)
 	DeleteRepoForOwner(ctx context.Context, owner, repoName string) error
+	ListPullRequestsForOwner(ctx context.Context, owner, repoName string) ([]*github.PullRequest, error)
 }
 
 // Real implementation of the GitHubClient interface
@@ -42,6 +43,14 @@ func (r *RealGitHubClient) DeleteRepoForOwner(ctx context.Context, owner, repoNa
 	_, err := r.gh.Repositories.Delete(ctx, owner, repoName)
 	// todo why return err?
 	return err
+}
+
+func (r *RealGitHubClient) ListPullRequestsForOwner(ctx context.Context, owner, repoName string) ([]*github.PullRequest, error) {
+	prs, _, err := r.gh.PullRequests.List(ctx, owner, repoName, nil)
+	if err != nil {
+		return nil, err
+	}
+	return prs, nil
 }
 
 type Client struct {
@@ -98,6 +107,10 @@ func (c *Client) CreateRepo(ctx context.Context, repoName string) (*github.Repos
 
 func (c *Client) DeleteRepo(ctx context.Context, repoName string) error {
 	return c.gh.DeleteRepoForOwner(ctx, c.owner, repoName)
+}
+
+func (c *Client) ListPullRequests(ctx context.Context, repoName string) ([]*github.PullRequest, error) {
+	return c.gh.ListPullRequestsForOwner(ctx, c.owner, repoName)
 }
 
 func NewTestClient(mockClient GitHubClient, owner string) *Client {
