@@ -12,6 +12,7 @@ import (
 type GitHubClient interface {
 	ListReposForOwner(ctx context.Context, owner string) ([]*github.Repository, error)
 	CreateRepoForOwner(ctx context.Context, owner, repoName string) (*github.Repository, error)
+	DeleteRepoForOwner(ctx context.Context, owner, repoName string) error
 }
 
 // Real implementation of the GitHubClient interface
@@ -35,6 +36,12 @@ func (r *RealGitHubClient) CreateRepoForOwner(ctx context.Context, owner, repoNa
 		return nil, err
 	}
 	return repo, nil
+}
+
+func (r *RealGitHubClient) DeleteRepoForOwner(ctx context.Context, owner, repoName string) error {
+	_, err := r.gh.Repositories.Delete(ctx, owner, repoName)
+	// todo why return err?
+	return err
 }
 
 type Client struct {
@@ -87,6 +94,10 @@ func (c *Client) ListRepos(ctx context.Context) ([]*github.Repository, error) {
 
 func (c *Client) CreateRepo(ctx context.Context, repoName string) (*github.Repository, error) {
 	return c.gh.CreateRepoForOwner(ctx, c.owner, repoName)
+}
+
+func (c *Client) DeleteRepo(ctx context.Context, repoName string) error {
+	return c.gh.DeleteRepoForOwner(ctx, c.owner, repoName)
 }
 
 func NewTestClient(mockClient GitHubClient, owner string) *Client {
