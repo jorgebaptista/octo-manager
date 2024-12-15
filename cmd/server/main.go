@@ -18,27 +18,46 @@ func main() {
 
 	router := gin.Default()
 
-	// Define routes (endpoints)
+	// todo Define routes (endpoints)
 
-	// todo 1. Create repo (placeholder)
+	// Create repo
 	router.POST("/repos", func(c *gin.Context) {
-		c.JSON(201, gin.H{"message": "repo created (placeholder)"})
+		var req struct {
+			Name string `json:"name"`
+		}
+		if err := c.BindJSON(&req); err != nil || req.Name == "" {
+			c.JSON(400, gin.H{"error": "invalid request"})
+		}
+
+		repo, err := ghClient.CreateRepo(context.Background(), req.Name)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(201, gin.H{"message": "Repository created", "name": *repo.Name})
 	})
 
-	// todo 2. Delete repo (placeholder)
+	// Delete repo
 	router.DELETE("/repos/:name", func(c *gin.Context) {
 		name := c.Param("name")
 		if name == "" {
 			c.JSON(400, gin.H{"error": "repository name is required"})
 			return
 		}
-		c.JSON(200, gin.H{"message": "repo deleted (placeholder)", "repo": name})
+
+		err := ghClient.DeleteRepo(context.Background(), name)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(200, gin.H{"message": "Repository deleted", "repo": name})
 	})
 
-	// List all repos (placeholder)
+	// List all repos
 	router.GET("/repos", func(c *gin.Context) {
-		ctx := context.Background()
-		repos, err := ghClient.ListRepos(ctx)
+		repos, err := ghClient.ListRepos(context.Background())
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
@@ -55,7 +74,7 @@ func main() {
 		c.JSON(200, gin.H{"repositories": repoNames})
 	})
 
-	// todo 4. List N open pull requests for a repo (placeholder)
+	// List N open pull requests for a repo
 	router.GET("/repos/:name/pulls", func(c *gin.Context) {
 		name := c.Param("name")
 		if name == "" {
@@ -63,12 +82,15 @@ func main() {
 			return
 		}
 
-		n := c.Query("n")
-		if n == "" {
-			n = "3" // default to 3
+		// todo implement n, if provided slice prs
+		// n := c.Query("n")
+		prs, err := ghClient.ListPullRequests(context.Background(), name)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
 		}
-		placeholderPRs := []string{"pr1", "pr2", "pr3"}
-		c.JSON(200, gin.H{"repo": name, "pull_requests": placeholderPRs, "count_requested": n})
+
+		// todo return all PRs for now
+		c.JSON(200, gin.H{"reposiroty": name, "pull_requests": prs, "count": len(prs)})
 	})
 
 	// Start server
