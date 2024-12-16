@@ -1,14 +1,17 @@
 name: Security
 
 on:
-  workflow_run:
-    workflows: ["Lint"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   security:
     runs-on: ubuntu-latest
+    needs: lint
 
     steps:
       - name: Checkout code

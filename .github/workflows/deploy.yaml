@@ -1,14 +1,17 @@
-name: Deploy to Minikube
+name: Deploy
 
 on:
-  workflow_run:
-    workflows: ["Build"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    needs: build
 
     steps:
       - name: Install kubectl
