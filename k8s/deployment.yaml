@@ -21,11 +21,11 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: octo-manager-secret
-                  key: GITHUB_TOKEN
+                  key: token
             - name: GITHUB_OWNER
               valueFrom:
                 secretKeyRef:
                   name: octo-manager-secret
-                  key: GITHUB_OWNER
+                  key: owner
           ports:
             - containerPort: 8080
