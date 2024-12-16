@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: octo-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: octo-manager
+  template:
+    metadata:
+      labels:
+        app: octo-manager
+    spec:
+      containers:
+        - name: octo-manager
+          image: jorgebaptista/octo-manager:latest
+          imagePullPolicy: Always
+          env:
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: octo-manager-secret
+                  key: GITHUB_TOKEN
+            - name: GITHUB_OWNER
+              valueFrom:
+                secretKeyRef:
+                  name: octo-manager-secret
+                  key: GITHUB_OWNER
+          ports:
+            - containerPort: 8080
