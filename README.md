@@ -1,8 +1,6 @@
 # Octo-Manager
 
-![Testing Check](https://github.com/jorgebaptista/octo-manager/actions/workflows/test.yml/badge.svg)
-![Linting](https://github.com/jorgebaptista/octo-manager/actions/workflows/lint.yml/badge.svg)
-![Security Check](https://github.com/jorgebaptista/octo-manager/actions/workflows/security.yml/badge.svg)
+[![CI/CD Pipeline](https://github.com/jorgebaptista/octo-manager/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/jorgebaptista/octo-manager/actions/workflows/pipeline.yaml)
 
 Octo-Manager is a REST API service written in Go to manage GitHub repositories and pull requests, with deployment on Minikube and a CI/CD pipeline for testing, linting, and security checks.
 
