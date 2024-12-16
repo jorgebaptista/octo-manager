@@ -1,12 +1,10 @@
-name: Testing Workflow
+name: Test
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Security"]
+    types:
+      - completed
 
 jobs:
   test:

@@ -1,4 +1,4 @@
-name: Linting Workflow
+name: Lint
 
 on:
   push:
