@@ -91,15 +91,10 @@ func main() {
 			return
 		}
 
-		prs, err := ghClient.ListPullRequests(context.Background(), name)
+		prs, err := ghClient.ListPullRequests(context.Background(), name, n)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
-		}
-
-		// If n is set, limit the number of PRs
-		if n != -1 && n < len(prs) {
-			prs = prs[:n]
 		}
 
 		c.JSON(200, gin.H{"reposiroty": name, "pull_requests": prs, "count": len(prs)})

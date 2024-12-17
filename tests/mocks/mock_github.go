@@ -43,9 +43,18 @@ func (m *MockGitHubClient) ListReposForOwner(ctx context.Context, owner string) 
 	return m.Repos, nil
 }
 
-func (m *MockGitHubClient) ListPullRequestsForOwner(ctx context.Context, owner, repoName string) ([]*github.PullRequest, error) {
+func (m *MockGitHubClient) ListPullRequestsForOwner(ctx context.Context, owner, repoName string, n int) ([]*github.PullRequest, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
+
+	if n == -1 {
+		return m.PullRequests, nil
+	}
+
+	if len(m.PullRequests) > n {
+		return m.PullRequests[:n], nil
+	}
+
 	return m.PullRequests, nil
 }

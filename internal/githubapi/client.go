@@ -13,7 +13,7 @@ type GitHubClient interface {
 	ListReposForOwner(ctx context.Context, owner string) ([]*github.Repository, error)
 	CreateRepoForOwner(ctx context.Context, owner, repoName string) (*github.Repository, error)
 	DeleteRepoForOwner(ctx context.Context, owner, repoName string) error
-	ListPullRequestsForOwner(ctx context.Context, owner, repoName string) ([]*github.PullRequest, error)
+	ListPullRequestsForOwner(ctx context.Context, owner, repoName string, n int) ([]*github.PullRequest, error)
 }
 
 // Real implementation of the GitHubClient interface
@@ -45,12 +45,33 @@ func (r *RealGitHubClient) ListReposForOwner(ctx context.Context, owner string) 
 	return repos, nil
 }
 
-func (r *RealGitHubClient) ListPullRequestsForOwner(ctx context.Context, owner, repoName string) ([]*github.PullRequest, error) {
-	prs, _, err := r.gh.PullRequests.List(ctx, owner, repoName, nil)
-	if err != nil {
-		return nil, err
+func (r *RealGitHubClient) ListPullRequestsForOwner(ctx context.Context, owner, repoName string, n int) ([]*github.PullRequest, error) {
+	opts := &github.PullRequestListOptions{
+		ListOptions: github.ListOptions{
+			PerPage: 100,
+		},
 	}
-	return prs, nil
+
+	var allPRs []*github.PullRequest
+	for {
+		prs, resp, err := r.gh.PullRequests.List(ctx, owner, repoName, opts)
+		if err != nil {
+			return nil, err
+		}
+
+		allPRs = append(allPRs, prs...)
+		if resp.NextPage == 0 {
+			break
+		}
+		opts.Page = resp.NextPage
+	}
+
+	// Limit the number of PRs if n is specified
+	if n != -1 && len(allPRs) > n {
+		allPRs = allPRs[:n]
+	}
+
+	return allPRs, nil
 }
 
 type Client struct {
@@ -109,8 +130,8 @@ func (c *Client) ListRepos(ctx context.Context) ([]*github.Repository, error) {
 	return c.gh.ListReposForOwner(ctx, c.owner)
 }
 
-func (c *Client) ListPullRequests(ctx context.Context, repoName string) ([]*github.PullRequest, error) {
-	return c.gh.ListPullRequestsForOwner(ctx, c.owner, repoName)
+func (c *Client) ListPullRequests(ctx context.Context, repoName string, n int) ([]*github.PullRequest, error) {
+	return c.gh.ListPullRequestsForOwner(ctx, c.owner, repoName, n)
 }
 
 func NewTestClient(mockClient GitHubClient, owner string) *Client {
