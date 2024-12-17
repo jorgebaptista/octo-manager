@@ -2,6 +2,7 @@ package mocks
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/go-github/v67/github"
 )
@@ -24,6 +25,19 @@ func (m *MockGitHubClient) CreateRepoForOwner(ctx context.Context, owner, repoNa
 func (m *MockGitHubClient) DeleteRepoForOwner(ctx context.Context, owner, repoName string) error {
 	if m.Err != nil {
 		return m.Err
+	}
+
+	// Check if the repo exists
+	repoFound := false
+	for _, repo := range m.Repos {
+		if *repo.Name == repoName {
+			repoFound = true
+			break
+		}
+	}
+
+	if !repoFound {
+		return fmt.Errorf("repository not found")
 	}
 
 	for i, repo := range m.Repos {

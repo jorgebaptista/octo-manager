@@ -2,6 +2,7 @@ package githubapi
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -32,9 +33,30 @@ func (r *RealGitHubClient) CreateRepoForOwner(ctx context.Context, owner, repoNa
 }
 
 func (r *RealGitHubClient) DeleteRepoForOwner(ctx context.Context, owner, repoName string) error {
-	_, err := r.gh.Repositories.Delete(ctx, owner, repoName)
-	// todo why return err?
-	return err
+	repos, _, err := r.gh.Repositories.ListByAuthenticatedUser(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	// Check if the repo exists
+	repoFound := false
+	for _, repo := range repos {
+		if *repo.Name == repoName {
+			repoFound = true
+			break
+		}
+	}
+
+	if !repoFound {
+		return fmt.Errorf("repository not found")
+	}
+
+	_, err = r.gh.Repositories.Delete(ctx, owner, repoName)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *RealGitHubClient) ListReposForOwner(ctx context.Context, owner string) ([]*github.Repository, error) {
