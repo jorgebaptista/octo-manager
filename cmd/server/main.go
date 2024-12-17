@@ -19,8 +19,6 @@ func main() {
 
 	router := gin.Default()
 
-	// todo Define routes (endpoints)
-
 	// Create repo
 	router.POST("/repos", func(c *gin.Context) {
 		var req struct {
