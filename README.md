@@ -98,7 +98,7 @@ Optional query parameter `?n=x` to limit the number of PRs.
 Run unit tests for the GitHub client:
 
 ```bash
-go test ./internal/githubapi -v
+go test ./tests/unit -v
 ```
 
 ### Integration Tests

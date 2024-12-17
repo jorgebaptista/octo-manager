@@ -40,7 +40,7 @@ jobs:
         with:
           go-version: "1.23"
       - run: go mod tidy
-      - run: go test ./... -v
+      - run: go test ./tests/unit -v
 
   integration-tests:
     runs-on: ubuntu-latest
