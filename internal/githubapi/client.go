@@ -69,6 +69,7 @@ func (r *RealGitHubClient) ListReposForOwner(ctx context.Context, owner string) 
 
 func (r *RealGitHubClient) ListPullRequestsForOwner(ctx context.Context, owner, repoName string, n int) ([]*github.PullRequest, error) {
 	opts := &github.PullRequestListOptions{
+		State: "open",
 		ListOptions: github.ListOptions{
 			PerPage: 100,
 		},
