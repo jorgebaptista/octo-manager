@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jorgebaptista/octo-manager/internal/githubapi"
@@ -82,14 +83,25 @@ func main() {
 			return
 		}
 
-		// todo implement n, if provided slice prs
-		// n := c.Query("n")
+		// Default is -1 means no limit
+		nStr := c.DefaultQuery("n", "-1")
+		n, err := strconv.Atoi(nStr)
+		if err != nil || n < -1 {
+			c.JSON(400, gin.H{"error": "invalid value for n"})
+			return
+		}
+
 		prs, err := ghClient.ListPullRequests(context.Background(), name)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
+			return
 		}
 
-		// todo return all PRs for now
+		// If n is set, limit the number of PRs
+		if n != -1 && n < len(prs) {
+			prs = prs[:n]
+		}
+
 		c.JSON(200, gin.H{"reposiroty": name, "pull_requests": prs, "count": len(prs)})
 	})
 
